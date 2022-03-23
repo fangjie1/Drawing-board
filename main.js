@@ -17,12 +17,14 @@ function drawLine(x1, y1, x2, y2) {
   ctx.lineTo(x2, y2)
   ctx.stroke()
 }
+
 // 判断当前设备是否支持触屏事件
 var isTouchDevice = 'ontouchstart' in document.documentElement
 
 if (isTouchDevice) {
   // 移动端
   canvas.ontouchstart = (e) => {
+    showDialogFn(e)
     let x = e.touches[0].clientX
     let y = e.touches[0].clientY
     last = [x, y]
@@ -36,19 +38,18 @@ if (isTouchDevice) {
     drawLine(last[0], last[1], x, y)
     last = [x, y]
   }
+  canvas.touchend = () => {
+    canvas.ontouchmove = null
+  }
 } else {
   // PC端
   canvas.onmousedown = (e) => {
-    if (e.target != dialog || (e.target != dialog) != rubberFull) {
-      dialog.style.opacity = 0
-    }
+    showDialogFn(e)
     last = [e.clientX, e.clientY]
-
     canvas.onmousemove = (e) => {
       if (rubber) {
         ctx.strokeStyle = '#fff'
       }
-
       drawLine(last[0], last[1], e.clientX, e.clientY)
       last = [e.clientX, e.clientY]
     }
@@ -58,10 +59,17 @@ if (isTouchDevice) {
   }
 }
 
-let li = document.querySelectorAll('li')
+// 隐藏弹窗
+const showDialogFn = function (e) {
+  if (e.target != dialog || (e.target != dialog) != rubberFull) {
+    dialog.style.opacity = 0
+  }
+}
+
+let li = document.querySelectorAll('li:nth-child(-n+6)')
 let rubberFull = document.querySelector('.icon-rubber-full')
 let clear = document.querySelector('.icon-qingkong')
-
+console.log(li)
 // 更换画笔颜色
 for (let i = 0; i < li.length; i++) {
   li[i].addEventListener('click', function () {
@@ -111,4 +119,5 @@ dialogArr.forEach((item, i) => {
 clear.addEventListener('click', function () {
   console.log('清空画布')
   ctx.clearRect(0, 0, canvas.width, canvas.height)
+  ctx.beginPath()
 })
